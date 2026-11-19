@@ -1,0 +1,33 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-multicluster
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: spoke1
+            url: https://6A640E83723B9FA7B2401322388B5A37.gr7.ap-south-1.eks.amazonaws.com
+          - cluster: spoke2
+            url: https://BEA28873E46D9C9FC9BDD48EE5D0E0A7.gr7.ap-south-1.eks.amazonaws.com
+
+  template:
+    metadata:
+      name: 'guestbook-appset-{{cluster}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/saijagadeesh14/argocd-example-apps.git
+        targetRevision: master
+        path: guestbook
+      destination:
+        server: '{{url}}'
+        namespace: guestbook-appset
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
